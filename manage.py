@@ -33,7 +33,7 @@ def create_database_and_tables():
         print('Nie udało się nawiązać połączenia z bazą danych.')
 
     cursor = connection.cursor()
-
+    
     try:
         cursor.execute("CREATE DATABASE IF NOT EXISTS event_management")
         cursor.execute("USE event_management")
@@ -54,8 +54,10 @@ def create_database_and_tables():
             end_date DATETIME NOT NULL,
             location VARCHAR(255),
             organizer_id INT,
+            parent_event_id INT,  -- Kolumna dla wydarzenia nadrzędnego
             status ENUM('zaplanowane', 'w trakcie', 'zakończone') NOT NULL,
-            FOREIGN KEY (organizer_id) REFERENCES User(user_id)
+            FOREIGN KEY (organizer_id) REFERENCES User(user_id),
+            FOREIGN KEY (parent_event_id) REFERENCES Event(event_id)  -- Klucz obcy dla wydarzenia nadrzędnego
         );
 
         CREATE TABLE IF NOT EXISTS EventSubmission (
