@@ -55,15 +55,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 # * Google as provider
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "APP": "google",
-        "CLIENT_ID": "915749206337-34bhouhj6jmqrn45ujnqj2rkq7ml4ior.apps.googleusercontent.com",  # Replace with your actual Google OAuth client ID
-        "SECRET": "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",  # Replace with your actual Google OAuth client secret
-        "SCOPE": ["email", "profile"],
-        "AUTH_PARAMS": {"access_type": "online"},
-    }
-}
+##Tutaj kod, ale git nie pozwala na commita z secretem
 # *Google API credentials
 
 
