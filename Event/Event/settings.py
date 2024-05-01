@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
 ]
 
-SITE_ID = 1
+SITE_ID = 2
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -54,10 +54,6 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
-# * Google as provider
-##Tutaj kod, ale git nie pozwala na commita
-# *Google API credentials
-
 
 AUTH_USER_MODEL = "app.User"
 
