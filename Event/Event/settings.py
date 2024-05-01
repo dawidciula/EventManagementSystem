@@ -55,7 +55,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 # * Google as provider
-##Tutaj kod, ale git nie pozwala na commita z secretem
+##Tutaj kod, ale git nie pozwala na commita
 # *Google API credentials
 
 
