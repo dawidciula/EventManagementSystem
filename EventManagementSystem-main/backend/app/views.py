@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model, login, logout
 from rest_framework.authentication import SessionAuthentication
 from app.forms import UserEditForm
-from .models import Event, Event_Registration
+from .models import Event
 from .serializer import EventRegistrationSerializer, UserRegisterSerializer, UserLoginSerializer, UserSerializer, EventSerializer
 from .validations import custom_validation, validate_email, validate_password
 from django.shortcuts import render
@@ -23,7 +23,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework import viewsets
 from django.contrib.auth.models import User
+from .forms import EventForm
 
+
+
+
+#rejestracja uzytkownikow
 User = get_user_model()
 
 class UserRegister(APIView):
@@ -41,7 +46,9 @@ class UserRegister(APIView):
             return redirect('/login')
         else:
             return render(request, 'register.html', {'error': 'Registration failed'})
+        
 
+#logowanie uzytkownikow
 class UserLogin(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (SessionAuthentication,)
@@ -62,6 +69,8 @@ class UserLogin(APIView):
             return render(request, 'login.html', {'error': 'Invalid credentials'})
 
 
+
+#wylogowywanie uzytkowwnikow
 class UserLogout(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()
@@ -75,6 +84,7 @@ class UserLogout(APIView):
         return redirect('home')
 
 
+#uzytkownicy
 class UserView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (SessionAuthentication,)
@@ -104,6 +114,7 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+#wydarzenia
 class EventView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -136,60 +147,33 @@ class EventView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+#strona startowa
 def home_view(request):
     return render(request, 'home.html')
 
-#member
-class EventListView(ListAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
-
-class EventDetailView(RetrieveAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
-
-class EventRegistrationView(CreateAPIView):
-    queryset = Event_Registration.objects.all()
-    serializer_class = EventRegistrationSerializer
-    permission_classes = [IsAuthenticated]
-
-#admin
-class EventCreateView(CreateAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [IsAdminUser]
-
-class EventUpdateView(RetrieveUpdateDestroyAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [IsAdminUser]
-
-class EventDeleteView(DestroyAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [IsAdminUser]
-
-class EventUserListView(ListAPIView):
-    serializer_class = EventRegistrationSerializer
-    permission_classes = [IsAdminUser]
-
-    def get_queryset(self):
-        event_id = self.kwargs['pk']
-        return Event_Registration.objects.filter(event_ID=event_id)
-    
 
 
+#panel administratora
 def admin_check(user):
     return user.is_superuser
 
 @login_required
-@user_passes_test(admin_check)
+@csrf_exempt
 def admin_dashboard(request):
+    User = get_user_model()
     users = User.objects.all()
     events = Event.objects.all()
-    return render(request, 'admin_dashboard.html', {'users': users, 'events': events})
+    
+    if request.method == 'POST':
+        event_form = EventForm(request.POST)
+        if event_form.is_valid():
+            event_form.save()
+            return redirect('admin_dashboard')
+    else:
+        event_form = EventForm()
+    
+    return render(request, 'admin_dashboard.html', {'users': users, 'events': events, 'event_form': event_form})
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -197,6 +181,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
+#edycja uzytkownika
 @login_required
 @csrf_exempt
 def edit_user(request, user_id):
@@ -211,13 +196,56 @@ def edit_user(request, user_id):
 
     return render(request, 'edit_user.html', {'user_form': user_form, 'user_id': user_id})
 
+#usuwanie uzytkownika
 @login_required
 def delete_user(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     user.delete()
     return redirect('admin_dashboard')
-    
+
+#detale uzytkownika
 @login_required
 def user_detail(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     return render(request, 'user_detail.html', {'user': user})
+
+
+
+
+#edycja wydarzenia
+@login_required
+@csrf_exempt
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    if request.method == 'POST':
+        event_form = EventForm(request.POST, instance=event)
+        if event_form.is_valid():
+            event_form.save()
+            return redirect('admin_dashboard')
+    else:
+        event_form = EventForm(instance=event)
+    return render(request, 'edit_event.html', {'event_form': event_form, 'event_id': event_id})
+
+#usuwanie wydarzenia
+@login_required
+@csrf_exempt
+def delete_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    event.delete()
+    return redirect('admin_dashboard')
+
+#tworzenie wydarzenia
+@login_required
+@csrf_exempt
+def create_event(request):
+    if request.method == 'POST':
+        event_form = EventForm(request.POST)
+        if event_form.is_valid():
+            event_form.save()
+            return redirect('admin_dashboard')
+    else:
+        event_form = EventForm()
+    return render(request, 'create_event.html', {'event_form': event_form})
+
+
+

@@ -75,7 +75,7 @@ class Event(models.Model):
         User, on_delete=models.CASCADE, to_field="user_ID"
     )  # ? to_field may be unnecessary since User has user_id as auto primary key to that field
     parent_event_ID = models.ForeignKey(
-        "self", on_delete=models.CASCADE, to_field="event_ID", null=True
+        "self", on_delete=models.CASCADE, to_field="event_ID", null=True, blank=True
     )  #! Need to be tested as its self-referential foreign key
     #! Check if this table works right as theres duplication for some fields
     # TODO Refractor if duplication fucks app table
