@@ -11,36 +11,42 @@ UserModel = get_user_model()
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserModel
-        fields = "__all__"
+        model = User
+        fields = ('username', 'password', 'email')
 
-    def create(self, clean_data):
-        user_obj = UserModel.objects.create_user(
-            email=clean_data["email"], password=clean_data["password"]
-        )
-        user_obj.username = clean_data["username"]
-        user_obj.save()
-        return user_obj
-
-
-class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField()
-
-    ##
-    def check_user(self, clean_data):
-        user = authenticate(
-            username=clean_data["email"], password=clean_data["password"]
-        )
-        if not user:
-            raise ValidationError("user not found")
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
         return user
 
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if not (username or email):
+            raise serializers.ValidationError('Username or email is required.')
+
+        user = None
+        if username:
+            user = authenticate(username=username, password=password)
+        elif email:
+            user = authenticate(email=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError('Invalid username or password.')
+
+        attrs['user'] = user
+        return attrs
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserModel
-        fields = ("email", "username")
+        model = User
+        fields = ('user_ID', 'username', 'email')
 
 
 """

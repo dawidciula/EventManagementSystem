@@ -2,26 +2,32 @@ from django.db import models
 from enum import Enum
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email, username, password=None):
         if not email:
             raise ValueError("An email is required.")
+        if not username:
+            raise ValueError("A username is required.")
         if not password:
             raise ValueError("A password is required.")
         email = self.normalize_email(email)
-        user = self.model(email=email)
+        user = self.model(email=email, username=username)
         user.set_password(password)
         user.save()
         return user
 
-    def create_superuser(self, email, password=None):
+    def create_superuser(self, email, username, password=None):
         if not email:
             raise ValueError("An email is required.")
+        if not username:
+            raise ValueError("A username is required.")
         if not password:
             raise ValueError("A password is required.")
-        user = self.create_user(email, password)
+        user = self.create_user(email, username, password)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -33,6 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=50, unique=True)
     username = models.CharField(max_length=50)
     is_staff = models.BooleanField(default=False)
+    role = models.CharField(max_length=50)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
     objects = UserManager()
@@ -41,26 +48,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
 
-# * User Role Enum
-""" class UserRole(Enum):
-    ADMIN = "Admin"
-    USER = "User"
-
-
-# * User Model
-class User(models.Model):
-    user_ID = models.BigAutoField(primary_key=True)
-    username = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
-
-
-
-class UserRole(models.Model):
-    role = models.CharField(
-        max_length=10, choices=[(role.value, role.name) for role in UserRole]
-    )
-    user_ID = models.ForeignKey(User, on_delete=models.CASCADE, to_field="user_ID")
-"""
 
 
 # * Event Status Enum
@@ -89,7 +76,7 @@ class Event(models.Model):
         User, on_delete=models.CASCADE, to_field="user_ID"
     )  # ? to_field may be unnecessary since User has user_id as auto primary key to that field
     parent_event_ID = models.ForeignKey(
-        "self", on_delete=models.CASCADE, to_field="event_ID", null=True
+        "self", on_delete=models.CASCADE, to_field="event_ID", null=True, blank=True
     )  #! Need to be tested as its self-referential foreign key
     #! Check if this table works right as theres duplication for some fields
     # TODO Refractor if duplication fucks app table
@@ -118,13 +105,14 @@ class Event_Submission(models.Model):
 
 
 # * Event Registration model
+from django.utils import timezone
+
 class Event_Registration(models.Model):
     registration_ID = models.BigAutoField(primary_key=True)
-    # event_ID = models.IntegerField()
-    # user_ID = models.IntegerField()
-    registration_Date = models.DateTimeField()
+    registration_Date = models.DateTimeField(default=timezone.now)
     event_ID = models.ForeignKey(Event, on_delete=models.CASCADE)
     user_ID = models.ForeignKey(User, on_delete=models.CASCADE)
+
 
 
 # * Category model
@@ -153,3 +141,4 @@ class Event_Tag(models.Model):
     # tag_ID = models.IntegerField() #! To make 2 primary keys
     event_ID = models.ForeignKey(Event, on_delete=models.CASCADE)
     tag_ID = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
