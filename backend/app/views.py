@@ -1,41 +1,24 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import get_user_model, login, logout
 from rest_framework.authentication import SessionAuthentication
-from app.forms import UserEditForm
-from .models import Event
-from .serializer import EventRegistrationSerializer, UserRegisterSerializer, UserLoginSerializer, UserSerializer, EventSerializer
-from .validations import custom_validation, validate_email, validate_password
-from django.shortcuts import render
-from django.shortcuts import redirect
-from django.http import HttpResponseServerError
-from rest_framework.generics import (
-    ListAPIView,
-    RetrieveAPIView,
-    CreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    DestroyAPIView
-)
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from rest_framework import viewsets
-from django.contrib.auth.models import User
-from .forms import EventForm
+from .forms import UserEditForm, EventForm
 from .models import Event, Event_Registration
+from .serializer import (
+    EventRegistrationSerializer, UserRegisterSerializer, UserLoginSerializer,
+    UserSerializer, EventSerializer
+)
 from django.contrib import messages
 from django.views import View
-from django.views.generic import DetailView
-from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets
 
-
-
-
-#rejestracja uzytkownikow
 User = get_user_model()
+
 
 class UserRegister(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -52,9 +35,8 @@ class UserRegister(APIView):
             return redirect('/login')
         else:
             return render(request, 'register.html', {'error': 'Registration failed'})
-        
 
-#logowanie uzytkownikow
+
 class UserLogin(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (SessionAuthentication,)
@@ -75,8 +57,6 @@ class UserLogin(APIView):
             return render(request, 'login.html', {'error': 'Invalid credentials'})
 
 
-
-#wylogowywanie uzytkowwnikow
 class UserLogout(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()
@@ -90,17 +70,16 @@ class UserLogout(APIView):
         return redirect('home')
 
 
-#uzytkownicy
 class UserView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (SessionAuthentication,)
 
     def get(self, request, pk=None):
         if pk:
-            user = get_object_or_404(get_user_model(), pk=pk)
+            user = get_object_or_404(User, pk=pk)
             serializer = UserSerializer(user)
         else:
-            users = get_user_model().objects.all()
+            users = User.objects.all()
             serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
@@ -112,7 +91,7 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
-        user = get_object_or_404(get_user_model(), pk=pk)
+        user = get_object_or_404(User, pk=pk)
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -120,20 +99,13 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-#strona startowa
 def home_view(request):
     return render(request, 'home.html')
 
 
-
-#panel administratora
-def admin_check(user):
-    return user.is_superuser
-
 @login_required
 @csrf_exempt
 def admin_dashboard(request):
-    User = get_user_model()
     users = User.objects.all()
     events = Event.objects.all()
     
@@ -148,17 +120,15 @@ def admin_dashboard(request):
     return render(request, 'admin_dashboard.html', {'users': users, 'events': events, 'event_form': event_form})
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-#edycja uzytkownika
 @login_required
 @csrf_exempt
 def edit_user(request, user_id):
-    user = get_object_or_404(get_user_model(), pk=user_id)
+    user = get_object_or_404(User, pk=user_id)
     if request.method == 'POST':
         user_form = UserEditForm(request.POST, instance=user)
         if user_form.is_valid():
@@ -169,14 +139,14 @@ def edit_user(request, user_id):
 
     return render(request, 'edit_user.html', {'user_form': user_form, 'user_id': user_id})
 
-#usuwanie uzytkownika
+
 @login_required
 def delete_user(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     user.delete()
     return redirect('admin_dashboard')
 
-#detale uzytkownika
+
 @login_required
 def user_detail(request, user_id):
     user = get_object_or_404(User, pk=user_id)
@@ -184,9 +154,6 @@ def user_detail(request, user_id):
     return render(request, 'user_detail.html', {'user': user, 'events_joined': events_joined})
 
 
-
-
-#edycja wydarzenia
 @login_required
 @csrf_exempt
 def edit_event(request, event_id):
@@ -200,15 +167,16 @@ def edit_event(request, event_id):
         event_form = EventForm(instance=event)
     return render(request, 'edit_event.html', {'event_form': event_form, 'event_id': event_id})
 
-#usuwanie wydarzenia
+
+
 @login_required
 @csrf_exempt
 def delete_event(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
     event.delete()
-    return redirect('admin_dashboard')
+    return JsonResponse({'message': 'Event deleted successfully'})
 
-#tworzenie wydarzenia
+
 @login_required
 @csrf_exempt
 def create_event(request):
@@ -230,6 +198,7 @@ class JoinEventView(View):
             messages.success(request, f'You have been signed up for the event: {event.title}')
         return redirect('events')
 
+
 class LeaveEventView(View):
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
@@ -239,11 +208,10 @@ class LeaveEventView(View):
         return redirect('events')
 
 
-#wydarzenia
 class EventView(APIView):
     def get(self, request, event_id=None):
         if event_id:
-            event = Event.objects.get(pk=event_id)
+            event = get_object_or_404(Event, pk=event_id)
             serializer = EventSerializer(event)
             return Response(serializer.data)
         else:
@@ -259,20 +227,11 @@ class EventView(APIView):
         return Response(serializer.errors, status=400)
 
 
-class EventListView(View):
+class EventListView(APIView):
     def get(self, request):
-        events = Event.objects.all()
-        if request.user.is_authenticated:
-            user_registrations = Event_Registration.objects.filter(user_ID=request.user)
-            user_registered_events = {registration.event_ID for registration in user_registrations}
-        else:
-            user_registered_events = set()
-        
-        context = {
-            'events': events,
-            'user_registered_events': user_registered_events,
-        }
-        return render(request, 'events.html', context)
+        events =Event.objects.all()
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data)
     
 
 class EventDetailView(View):
@@ -287,3 +246,4 @@ class EventDetailView(View):
             'is_registered': is_registered,
         }
         return render(request, 'event_detail.html', context)
+

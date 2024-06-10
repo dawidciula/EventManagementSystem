@@ -22,7 +22,7 @@ def create_database_and_tables():
     db_config = {
         'host': 'localhost',
         'user': 'root',
-        'password': 'root',
+        'password': 'password',
         'database': 'event_management'
     }
     connection = mysql.connector.connect(**db_config)
