@@ -12,11 +12,12 @@ UserModel = get_user_model()
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'password', 'email')
+        fields = ("username", "password", "email")
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=False)
@@ -24,12 +25,12 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, attrs):
-        username = attrs.get('username')
-        email = attrs.get('email')
-        password = attrs.get('password')
+        username = attrs.get("username")
+        email = attrs.get("email")
+        password = attrs.get("password")
 
         if not (username or email):
-            raise serializers.ValidationError('Username or email is required.')
+            raise serializers.ValidationError("Username or email is required.")
 
         user = None
         if username:
@@ -38,15 +39,16 @@ class UserLoginSerializer(serializers.Serializer):
             user = authenticate(email=email, password=password)
 
         if not user:
-            raise serializers.ValidationError('Invalid username or password.')
+            raise serializers.ValidationError("Invalid username or password.")
 
-        attrs['user'] = user
+        attrs["user"] = user
         return attrs
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('user_ID', 'username', 'email')
+        fields = ("user_ID", "username", "email")
 
 
 """
@@ -79,6 +81,7 @@ class EventSerializer(serializers.ModelSerializer):
             "organizer_ID",
             "parent_event_ID",
             "status",
+            "eventImage",
         ]
 
 

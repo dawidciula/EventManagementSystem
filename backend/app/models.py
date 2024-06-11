@@ -48,8 +48,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
 
-
-
 # * Event Status Enum
 class EventStatus(Enum):
     PLANNED = "Planned"
@@ -72,6 +70,7 @@ class Event(models.Model):
     status = models.CharField(
         max_length=10, choices=[(status.value, status.name) for status in EventStatus]
     )
+    eventImage = models.CharField(max_length=1000)
     organizer_ID = models.ForeignKey(
         User, on_delete=models.CASCADE, to_field="user_ID"
     )  # ? to_field may be unnecessary since User has user_id as auto primary key to that field
@@ -107,12 +106,12 @@ class Event_Submission(models.Model):
 # * Event Registration model
 from django.utils import timezone
 
+
 class Event_Registration(models.Model):
     registration_ID = models.BigAutoField(primary_key=True)
     registration_Date = models.DateTimeField(default=timezone.now)
     event_ID = models.ForeignKey(Event, on_delete=models.CASCADE)
     user_ID = models.ForeignKey(User, on_delete=models.CASCADE)
-
 
 
 # * Category model
@@ -141,4 +140,3 @@ class Event_Tag(models.Model):
     # tag_ID = models.IntegerField() #! To make 2 primary keys
     event_ID = models.ForeignKey(Event, on_delete=models.CASCADE)
     tag_ID = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
