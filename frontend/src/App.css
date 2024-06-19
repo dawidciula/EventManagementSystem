@@ -1,44 +1,119 @@
-/* App.css */
-
-/* General styles */
-body {
+.app-container {
   font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
+  padding: 20px;
+  max-width: 1200px; /* Ograniczenie szerokości */
+  margin: 0 auto; /* Wyśrodkowanie */
 }
 
-.App {
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center; /* Wyśrodkowanie paska */
+  align-items: center;
+  background-color: #ffeb3b; /* Podświetlenie na żółto */
+  padding: 10px;
+  margin-bottom: 40px; /* Zwiększony odstęp */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 800px; /* Mniejszy rozmiar */
+  margin: 0 auto 40px auto; /* Wyśrodkowanie i dodanie odstępu na dole */
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.search-filter {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.search-filter span {
+  margin-right: 5px;
+}
+
+.search-filter select,
+.date-picker {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+}
+
+.search-button {
+  background-color: #f36e26;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background-color: #ff4705;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Trzy kolumny */
+  gap: 30px; /* Zwiększone odstępy między kolumnami */
+  justify-content: center; /* Wyśrodkowanie */
+}
+
+.event-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+}
+
+.event-image {
+  width: 100%;
+  height: 200px; /* Wysokość okienka */
+  object-fit: contain; /* Dopasowanie zdjęć bez przycinania */
+}
+
+.event-details {
+  padding: 15px;
   text-align: center;
 }
 
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
+.event-title {
+  font-size: 18px;
+  margin: 10px 0;
+  color: #ffa500; /* Podświetlenie na pomarańczowo */
 }
 
-.navbar-brand {
+.event-details p {
+  color: #555;
+  margin: 5px 0;
+}
+
+.order-button {
+  background-color: #ffcb05;
+  border: none;
+  border-radius: 4px;
+  color: #333;
+  cursor: pointer;
   font-weight: bold;
-  font-size: 1.5rem;
+  padding: 10px 20px;
+  text-transform: uppercase;
 }
 
-.form-control {
-  max-width: 300px;
-  margin: 0 auto 10px auto;
+.order-button:hover {
+  background-color: #e0b504;
 }
 
-.form-text {
-  text-align: left;
-}
-
-#form_btn {
-  margin-left: 10px;
-}
-
-h2 {
-  color: #343a40;
-  margin-top: 20px;
-}
