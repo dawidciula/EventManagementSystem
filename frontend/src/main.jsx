@@ -8,7 +8,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <NavigationBar />
+    <NavigationBar></NavigationBar>
     <App />
   </React.StrictMode>
 );
