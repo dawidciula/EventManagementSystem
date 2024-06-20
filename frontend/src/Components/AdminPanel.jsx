@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Table, Modal, Form } from "react-bootstrap";
-import "../styles/AdminPanel.css"; // Zaimportowanie pliku stylów dla AdminPanel
+import "../styles/AdminPanel.css"; // Importuj plik stylów dla AdminPanel
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [events, setEvents] = useState([]);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
+  });
+  const [editEventData, setEditEventData] = useState({
+    id: "",
+    title: "",
+    description: "",
+    date: "",
+    location: "",
   });
 
   useEffect(() => {
@@ -52,30 +60,36 @@ const AdminPanel = () => {
     }
   };
 
+  const handleEventFormChange = (e) => {
+    setEditEventData({ ...editEventData, [e.target.name]: e.target.value });
+  };
+
   const handleEventFormSubmit = async (e) => {
     e.preventDefault();
-    const newEvent = {
-      title: formData.title,
-      description: formData.description,
-      date: formData.date,
-      location: formData.location,
+    const updatedEvent = {
+      title: editEventData.title,
+      description: editEventData.description,
+      date: editEventData.date,
+      location: editEventData.location,
     };
     try {
-      await axios.post("http://localhost:8000/events/", newEvent);
-      setShowEventModal(false);
+      await axios.put(`http://localhost:8000/events/${editEventData.id}/`, updatedEvent);
+      setShowEditEventModal(false);
       fetchEvents();
     } catch (error) {
-      console.error("Failed to create event: ", error);
+      console.error(`Failed to update event ${editEventData.id}: `, error);
     }
   };
 
-  const deleteUser = async (userId) => {
-    try {
-      await axios.delete(`http://localhost:8000/users/${userId}/`);
-      fetchUsers();
-    } catch (error) {
-      console.error(`Failed to delete user ${userId}: `, error);
-    }
+  const openEditEventModal = (event) => {
+    setEditEventData({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      location: event.location,
+    });
+    setShowEditEventModal(true);
   };
 
   const deleteEvent = async (eventId) => {
@@ -146,7 +160,7 @@ const AdminPanel = () => {
               <Form.Control
                 type="text"
                 name="title"
-                onChange={handleUserFormChange}
+                onChange={handleEventFormChange}
                 required
               />
             </Form.Group>
@@ -156,7 +170,7 @@ const AdminPanel = () => {
                 as="textarea"
                 rows={3}
                 name="description"
-                onChange={handleUserFormChange}
+                onChange={handleEventFormChange}
                 required
               />
             </Form.Group>
@@ -166,7 +180,7 @@ const AdminPanel = () => {
                 type="text"
                 name="date"
                 placeholder="YYYY-MM-DD"
-                onChange={handleUserFormChange}
+                onChange={handleEventFormChange}
                 required
               />
             </Form.Group>
@@ -175,12 +189,68 @@ const AdminPanel = () => {
               <Form.Control
                 type="text"
                 name="location"
-                onChange={handleUserFormChange}
+                onChange={handleEventFormChange}
                 required
               />
             </Form.Group>
             <Button variant="primary" type="submit">
               Submit
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Modal for editing events */}
+      <Modal show={showEditEventModal} onHide={() => setShowEditEventModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Event</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEventFormSubmit}>
+            <Form.Group controlId="formEditTitle">
+              <Form.Label>Title</Form.Label>
+              <Form.Control
+                type="text"
+                name="title"
+                value={editEventData.title}
+                onChange={handleEventFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEditDescription">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="description"
+                value={editEventData.description}
+                onChange={handleEventFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEditDate">
+              <Form.Label>Date</Form.Label>
+              <Form.Control
+                type="text"
+                name="date"
+                placeholder="YYYY-MM-DD"
+                value={editEventData.date}
+                onChange={handleEventFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEditLocation">
+              <Form.Label>Location</Form.Label>
+              <Form.Control
+                type="text"
+                name="location"
+                value={editEventData.location}
+                onChange={handleEventFormChange}
+                required
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Save Changes
             </Button>
           </Form>
         </Modal.Body>
@@ -231,6 +301,9 @@ const AdminPanel = () => {
               <td>{event.date}</td>
               <td>{event.location}</td>
               <td>
+                <Button variant="info" onClick={() => openEditEventModal(event)}>
+                  Edit
+                </Button>{" "}
                 <Button variant="danger" onClick={() => deleteEvent(event.id)}>
                   Delete
                 </Button>
