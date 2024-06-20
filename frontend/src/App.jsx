@@ -7,6 +7,7 @@ import "./App.css"; // Import the CSS file
 import Register from "./Components/Register";
 import Events from "./Components/Events";
 import Login from "./Components/Login";
+import AdminPanel from "./Components/AdminPanel";
 
 const App = () => {
   
@@ -14,9 +15,11 @@ const App = () => {
     <Router>
     <div className="app-container">
       <Routes>
+        <Route path="/" element={<Events />} />
         <Route path="/events" element={<Events />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/adminpanel" element={<AdminPanel />} />
       </Routes>
     </div>
   </Router>

@@ -1,0 +1,44 @@
+/* AdminPanel.css */
+
+  /* Nagłówek */
+  .app-container h1 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Przyciski */
+  .app-container Button {
+    margin-right: 10px;
+  }
+  
+  /* Modale */
+  .modal-content {
+    border-radius: 0;
+  }
+  
+  /* Tabela użytkowników i wydarzeń */
+  .table {
+    margin-top: 20px;
+  }
+  
+  /* Style dla formularzy */
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  /* Przyciski akcji w tabelach */
+  .table Button {
+    font-size: 14px;
+  }
+  
+  /* Formularz dodawania użytkownika */
+  .modal-body Form {
+    margin-bottom: 0;
+  }
+  
+  /* Przycisk "Delete" w tabelach */
+  .table Button {
+    padding: 6px 12px;
+  }
+  
