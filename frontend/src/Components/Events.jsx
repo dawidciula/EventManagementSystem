@@ -6,15 +6,18 @@ import "../App.css"; // Import the CSS file
 
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/events/")
       .then((response) => {
-        console.log(response.data);
         if (Array.isArray(response.data)) {
           setEvents(response.data);
+          setFilteredEvents(response.data);
         } else {
           console.error("Data not in table / json");
         }
@@ -24,39 +27,75 @@ const Events = () => {
       });
   }, []);
 
+  useEffect(() => {
+    filterEvents();
+  }, [searchTerm, selectedDate, selectedLocation]);
+
+  const filterEvents = () => {
+    let filtered = events;
+
+    if (searchTerm) {
+      filtered = filtered.filter(event =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedDate) {
+      const selectedDateString = selectedDate.toLocaleDateString('sv-SE');
+      filtered = filtered.filter(event => event.date === selectedDateString);
+      console.log("Filtering by date:", selectedDateString, filtered);
+    }
+
+    if (selectedLocation) {
+      filtered = filtered.filter(event => 
+        event.location.toLowerCase() === selectedLocation.toLowerCase()
+      );
+    }
+
+    setFilteredEvents(filtered);
+  };
+
   return (
     <div className="app-container">
       <h1>Odnajdź swoje upragnione wydarzenie</h1>
       <p></p>
       <div className="search-bar">
-        <input type="text" placeholder="Szukaj" className="search-input" />
+        <input
+          type="text"
+          placeholder="Szukaj"
+          className="search-input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <div className="search-filter">
           <span>Data</span>
           <DatePicker
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
-            dateFormat="dd/MM/yyyy"
+            dateFormat="yyyy-MM-dd"
             placeholderText="Wybierz datę"
             className="date-picker"
           />
         </div>
         <div className="search-filter">
           <span>Lokalizacja</span>
-          <select>
+          <select
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+          >
             <option value="">Wszystkie</option>
-            <option value="krakow">Kraków</option>
-            <option value="warsaw">Warszawa</option>
-            <option value="wroclaw">Wrocław</option>
-            <option value="gdansk">Gdańsk</option>
-            <option value="poznan">Poznań</option>
-            <option value="lodz">Łódź</option>
-            <option value="szczecin">Szczecin</option>
+            <option value="Kraków">Kraków</option>
+            <option value="Warszawa">Warszawa</option>
+            <option value="Wrocław">Wrocław</option>
+            <option value="Gdańsk">Gdańsk</option>
+            <option value="Poznań">Poznań</option>
+            <option value="Łódź">Łódź</option>
+            <option value="Szczecin">Szczecin</option>
           </select>
         </div>
-        <button className="search-button">Szukaj</button>
       </div>
       <div className="events-grid">
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <div key={event.event_ID} className="event-card">
             <img src={event.eventImage} alt="Obrazek" className="event-image" />
             <div className="event-details">
@@ -73,4 +112,3 @@ const Events = () => {
 };
 
 export default Events;
-
