@@ -10,6 +10,9 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     axios
@@ -55,6 +58,27 @@ const Events = () => {
     setFilteredEvents(filtered);
   };
 
+  const handleOrderTicket = (eventId) => {
+    setLoading(true);
+    setSuccessMessage("");
+    setErrorMessage("");
+    axios
+      .post(`http://127.0.0.1:8000/events/${eventId}/join/`)
+      .then((response) => {
+        setLoading(false);
+        setSuccessMessage("Pomyślnie zapisano na wydarzenie");
+        // Optionally update the event list to reflect the change
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error.response.status === 403) {
+          setErrorMessage("Musisz być zalogowany, aby zapisać się na wydarzenie");
+        } else {
+          setErrorMessage("Błąd przy zapisywaniu na wydarzenie");
+        }
+      });
+  };
+
   return (
     <div className="app-container">
       <h1>Odnajdź swoje upragnione wydarzenie</h1>
@@ -94,6 +118,9 @@ const Events = () => {
           </select>
         </div>
       </div>
+      {loading && <div className="loading">Ładowanie...</div>}
+      {successMessage && <div className="success-message">{successMessage}</div>}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
       <div className="events-grid">
         {filteredEvents.map((event) => (
           <div key={event.event_ID} className="event-card">
@@ -102,7 +129,7 @@ const Events = () => {
               <h2 className="event-title">{event.title}</h2>
               <p>{event.date}</p>
               <p>{event.location}</p>
-              <button className="order-button">Zamów Bilet</button>
+              <button className="order-button" onClick={() => handleOrderTicket(event.event_ID)}>Zamów Bilet</button>
             </div>
           </div>
         ))}
