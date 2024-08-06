@@ -1,33 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ event.title }}</title>
-</head>
-<body>
-    <h1>{{ event.title }}</h1>
-    <p>Date: {{ event.date }}</p>
-    <p>Start Date: {{ event.start_date }}</p>
-    <p>End Date: {{ event.end_date }}</p>
-    <p>Description: {{ event.description }}</p>
-    <p>Location: {{ event.location }}</p>
-    <p>Status: {{ event.status }}</p>
-    <p>Organizer: {{ event.organizer_ID.username }}</p>
-    <p>Parent Event ID: {{ event.parent_event_ID }}</p>
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Event Detail{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="event-card card">
+        {% if event.image %}
+        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
+        {% else %}
+        <img src="{% static 'images/flower.jpg' %}" class="card-img-top" alt="Default Image">
+        {% endif %}
+        <div class="card-body">
+            <h1>{{ event.title }}</h1>
+            <p>Date: {{ event.date }}</p>
+            <p>Start Time: {{ event.start_date|time:"H:i" }}</p>
+            <p>End Time: {{ event.end_date|time:"H:i" }}</p>
+            <p>Description: {{ event.description }}</p>
+            <p>Location: {{ event.location }}</p>
+            <p>Status: {{ event.status }}</p>
+            <p>Organizer: {{ event.organizer_ID.username }}</p>
 
-    {% if user.is_authenticated %}
-    {% if is_registered %}
-    <form action="{% url 'leave_event' event.pk %}" method="post">
-        {% csrf_token %}
-        <button type="submit" style="background-color: red;">Leave Event</button>
-    </form>
-    {% else %}
-    <form action="{% url 'join_event' event.pk %}" method="post">
-        {% csrf_token %}
-        <button type="submit" style="background-color: green;">Join Event</button>
-    </form>
-    {% endif %}
-    {% endif %}
-</body>
-</html>
+            {% if messages %}
+                <div class="alert alert-success">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                {% if is_registered %}
+                <form action="{% url 'leave_event' event.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Leave Event</button>
+                </form>
+                {% else %}
+                <form action="{% url 'join_event' event.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Join Event</button>
+                </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

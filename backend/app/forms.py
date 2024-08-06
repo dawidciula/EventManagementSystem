@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Event
+from .models import Event, User, EventStatus
 
 #formularz dla uzytkownika
 class UserEditForm(forms.ModelForm):
@@ -17,9 +17,10 @@ class EventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        fields = ['title', 'date', 'description', 'start_date', 'end_date', 'location', 'status', 'organizer_ID', 'parent_event_ID']
+        fields = ['title', 'date', 'description', 'start_date', 'end_date', 'location', 'status', 'organizer_ID', 'image', 'parent_event_ID']
         widgets = {
             'parent_event_ID': forms.Select(attrs={'class': 'form-control'}),
         }
+
         
 

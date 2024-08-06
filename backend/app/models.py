@@ -48,6 +48,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
 
+
+
 # * Event Status Enum
 class EventStatus(Enum):
     PLANNED = "Planned"
@@ -60,26 +62,18 @@ class EventStatus(Enum):
 class Event(models.Model):
     event_ID = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=255)
-    date = models.DateField(max_length=255)
+    date = models.DateField()
     description = models.TextField()
-    start_date = models.DateTimeField()  #! Could add specific time
-    end_date = models.DateTimeField()  #! Could add specific time
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     location = models.CharField(max_length=255)
-    # organizer_ID = models.IntegerField()
-    parent_event_ID = models.IntegerField()
-    status = models.CharField(
-        max_length=10, choices=[(status.value, status.name) for status in EventStatus]
-    )
-    eventImage = models.CharField(max_length=1000)
-    organizer_ID = models.ForeignKey(
-        User, on_delete=models.CASCADE, to_field="user_ID"
-    )  # ? to_field may be unnecessary since User has user_id as auto primary key to that field
-    parent_event_ID = models.ForeignKey(
-        "self", on_delete=models.CASCADE, to_field="event_ID", null=True, blank=True
-    )  #! Need to be tested as its self-referential foreign key
-    #! Check if this table works right as theres duplication for some fields
-    # TODO Refractor if duplication fucks app table
+    status = models.CharField(max_length=10, choices=[(status.value, status.name) for status in EventStatus])
+    organizer_ID = models.ForeignKey(User, on_delete=models.CASCADE, to_field="user_ID")
+    image = models.ImageField(upload_to='events/', null=True, blank=True)
+    parent_event_ID = models.ForeignKey("self", on_delete=models.CASCADE, to_field="event_ID", null=True, blank=True)
 
+    def __str__(self):
+        return self.title
 
 # * Submission Status Enum
 class SubmissionEnum(Enum):
@@ -106,12 +100,12 @@ class Event_Submission(models.Model):
 # * Event Registration model
 from django.utils import timezone
 
-
 class Event_Registration(models.Model):
     registration_ID = models.BigAutoField(primary_key=True)
     registration_Date = models.DateTimeField(default=timezone.now)
     event_ID = models.ForeignKey(Event, on_delete=models.CASCADE)
     user_ID = models.ForeignKey(User, on_delete=models.CASCADE)
+
 
 
 # * Category model
@@ -140,3 +134,4 @@ class Event_Tag(models.Model):
     # tag_ID = models.IntegerField() #! To make 2 primary keys
     event_ID = models.ForeignKey(Event, on_delete=models.CASCADE)
     tag_ID = models.ForeignKey(Tag, on_delete=models.CASCADE)
+

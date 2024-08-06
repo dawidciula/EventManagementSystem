@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block content %}
+<h1>Events</h1>
+<div class="list-group">
+    {% for event in events %}
+    <div class="list-group-item">
+        <h2><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></h2>
+        <p>Date: {{ event.date }}</p>
+        <p>Description: {{ event.description }}</p>
+        {% if user.is_authenticated %}
+            {% if event in user_registered_events %}
+            <form action="{% url 'leave_event' event.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Leave Event</button>
+            </form>
+            {% else %}
+            <form action="{% url 'join_event' event.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Join Event</button>
+            </form>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+<div>
+    {% for message in messages %}
+    <div class="alert alert-info">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endblock %}
