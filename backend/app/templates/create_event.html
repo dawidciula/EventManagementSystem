@@ -1,12 +1,65 @@
-
 {% extends "base.html" %}
+
 {% block title %}Create Event{% endblock %}
+
 {% block content %}
 <h1>Create Event</h1>
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ event_form.as_p }}
+
+    <div class="form-group">
+        <label for="id_title">Title:</label>
+        {{ event_form.title }}
+    </div>
+    
+    <div class="form-group">
+        <label for="id_date">Date:</label>
+        {{ event_form.date }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_description">Description:</label>
+        {{ event_form.description }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_start_date">Start Date:</label>
+        {{ event_form.start_date }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_end_date">End Date:</label>
+        {{ event_form.end_date }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_location">Location:</label>
+        {{ event_form.location }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_status">Status:</label>
+        {{ event_form.status }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_organizer_ID">Organizer:</label>
+        {{ event_form.organizer_ID }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_image">Image:</label>
+        {{ event_form.image }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_parent_event_ID">Parent Event:</label>
+        {{ event_form.parent_event_ID }}
+    </div>
+
     <button type="submit" class="btn btn-primary">Create Event</button>
     <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
 </form>
+
 {% endblock %}

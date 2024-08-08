@@ -48,9 +48,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
 
-
-
-# * Event Status Enum
 class EventStatus(Enum):
     PLANNED = "Planned"
     DURING = "During"
@@ -58,7 +55,6 @@ class EventStatus(Enum):
     CANCELLED = "Cancelled"
 
 
-# * Event model
 class Event(models.Model):
     event_ID = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=255)
@@ -75,14 +71,13 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-# * Submission Status Enum
+
 class SubmissionEnum(Enum):
     PENDING = "Pending"
     ACCEPTED = "Accepted"
     REJECTED = "Rejected"
 
 
-# * Event_Submission model
 class Event_Submission(models.Model):
     submission_ID = models.BigAutoField(primary_key=True)
     # event_ID = models.IntegerField()
@@ -97,7 +92,6 @@ class Event_Submission(models.Model):
     user_ID = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-# * Event Registration model
 from django.utils import timezone
 
 class Event_Registration(models.Model):
@@ -107,14 +101,11 @@ class Event_Registration(models.Model):
     user_ID = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-
-# * Category model
 class Category(models.Model):
     category_ID = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
 
 
-# *Event Category model
 class Event_Category(models.Model):
     # event_ID = models.IntegerField() #! Need to add class meta in serializer to use Constraint
     # category_ID = models.IntegerField() #! To make 2 primary keys
@@ -122,13 +113,11 @@ class Event_Category(models.Model):
     category_ID = models.ForeignKey(Category, on_delete=models.CASCADE)
 
 
-# * Tag model
 class Tag(models.Model):
     tag_ID = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
 
 
-# * Event Tag Model
 class Event_Tag(models.Model):
     # event_ID = models.IntegerField() #! Need to add class meta in serializer to use Constraint
     # tag_ID = models.IntegerField() #! To make 2 primary keys

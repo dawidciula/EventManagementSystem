@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model, login, logout
 from rest_framework.authentication import SessionAuthentication
 from app.forms import UserEditForm
 from .models import Event
+from django.db.models import Q
 from .serializer import EventRegistrationSerializer, UserRegisterSerializer, UserLoginSerializer, UserSerializer, EventSerializer
 from .validations import custom_validation, validate_email, validate_password
 from django.shortcuts import render
@@ -123,7 +124,14 @@ class UserView(APIView):
 
 #strona startowa
 def home_view(request):
-    events = Event.objects.all()
+    query = request.GET.get('q')
+    if query:
+        events = Event.objects.filter(
+            Q(title__icontains=query) | Q(date__icontains=query)
+        )
+    else:
+        events = Event.objects.all()
+    
     return render(request, 'home.html', {'events': events})
 
 
@@ -217,40 +225,13 @@ def create_event(request):
     if request.method == 'POST':
         event_form = EventForm(request.POST, request.FILES)
         if event_form.is_valid():
-            event = event_form.save(commit=False)
-
-            # Pobierz start_date i end_date z formularza
-            start_date_str = request.POST.get('start_date')
-            end_date_str = request.POST.get('end_date')
-
-            today = date.today()
-            try:
-                if start_date_str and end_date_str:
-                    # Oczekiwany format: "HH:MM"
-                    start_date = datetime.strptime(start_date_str, '%H:%M').time()
-                    end_date = datetime.strptime(end_date_str, '%H:%M').time()
-
-                    # Połącz czas z datą
-                    event.start_date = datetime.combine(today, start_date)
-                    event.end_date = datetime.combine(today, end_date)
-                else:
-                    event_form.add_error(None, 'Start time and end time must be provided.')
-                    return render(request, 'create_event.html', {'event_form': event_form})
-            except ValueError:
-                # Dodaj błędy, jeśli konwersja się nie powiedzie
-                event_form.add_error('start_date', 'Invalid time format.')
-                event_form.add_error('end_date', 'Invalid time format.')
-                return render(request, 'create_event.html', {'event_form': event_form})
-
-            event.save()
+            event_form.save()
             return redirect('admin_dashboard')
-        else:
-            print("Form is not valid.")
-            print(event_form.errors)
     else:
         event_form = EventForm()
-
+    
     return render(request, 'create_event.html', {'event_form': event_form})
+
 
 
 class JoinEventView(View):
