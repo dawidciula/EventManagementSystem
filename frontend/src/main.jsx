@@ -1,14 +1,14 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import NavigationBar from "./Components/Navbar.jsx";
-import "./index.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-//import { Nav } from "react-bootstrap";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import { SearchProvider } from "./components/SearchContext"; // Import SearchProvider
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <NavigationBar />
-    <App />
-  </React.StrictMode>
+import "bootstrap/dist/css/bootstrap.min.css";
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <SearchProvider>
+      <App />
+    </SearchProvider>
+  </StrictMode>
 );

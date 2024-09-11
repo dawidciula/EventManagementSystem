@@ -1,35 +1,36 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import HomePage from "./components/HomePage";
+import Navbar from "./components/Navbar";
+import AdminDashboard from "./components/AdminPanel";
+import CreateEvent from "./components/CreateEvent";
+import EditEvent from "./components/EditEvent";
+import EditUser from "./components/EditUser";
+import EventDetail from "./components/EventDetails";
+import EventsList from "./components/Events";
+import LoginPage from "./components/LoginPage";
+import RegisterPage from "./components/RegisterPage";
+import UserDetailPage from "./components/UserDetails";
+import UserListPage from "./components/UsersList";
 
 const App = () => {
-  const [Events, setEvent] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/events/")
-      .then((Response) => {
-        console.log(Response.data);
-        if (Array.isArray(Response.data)) {
-          setEvent(Response.data);
-        } else {
-          console.error("Data not in table / json"); //! Delete after debug test
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to fetch data", error);
-      });
-  }, []);
-
   return (
-    <div>
-      <h1>Odnajdź swoje upragnione wydarzenie</h1>
-      <ul>
-        {Events.map((event) => (
-          <li key={event.event_ID}>{event.title},</li>
-          //* Potem do dodania obrazek <img src={event.eventImage} alt="Obrazek"/>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/admin_dashboard" element={<AdminDashboard />} />
+        <Route path="/create_event" element={<CreateEvent />} />
+        <Route path="/edit_event/:eventId" element={<EditEvent />} />
+        <Route path="/edit_user/:userId" element={<EditUser />} />
+        <Route path="/events/:eventId" element={<EventDetail />} />
+        <Route path="/events" element={<EventsList />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/users_details/:userId" element={<UserDetailPage />} />
+        <Route path="/users" element={<UserListPage />} />
+        {/* Add routes for other components */}
+      </Routes>
+    </Router>
   );
 };
 
